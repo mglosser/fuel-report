@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model VehicleType {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(30)
+  vehicles Vehicle[]
+
+  @@map("vehicleTypes")
+}
+
+model Vehicle {
+  id            Int         @id @default(autoincrement())
+  vehicleTypeId Int
+  unitNumber    String      @db.VarChar(20)
+  plate         String      @db.VarChar(20)
+  isRental      Boolean
+  branch        String      @db.VarChar(50)
+  active        Boolean
+  vehicleType   VehicleType @relation(fields: [vehicleTypeId], references: [id])
+  fuelStops     FuelStop[]
+
+  @@map("vehicles")
+}
+
+model FuelStop {
+  id             String   @id @db.VarChar(36)
+  vehicleId      Int
+  driverId       Int
+  costPerGallon  Float?
+  totalCost      Float
+  gallons        Float
+  date           BigInt
+  time           BigInt
+  imageUrl       String?
+  vehicle        Vehicle  @relation(fields: [vehicleId], references: [id])
+
+  @@map("fuelStops")
+}
+
+model Driver {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(40)
+  branch String      @db.VarChar(2)
+
+  @@map("drivers")
+}
+
+model ApiKeys {
+  id            String  @id @db.VarChar(256)
+  createdBy     String  @db.VarChar(30)
+  expires       BigInt
+  active        Boolean
+
+  @@map("apiKeys")
+}
