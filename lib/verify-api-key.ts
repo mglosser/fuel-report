@@ -20,8 +20,6 @@ export const verifyApiKey = async (apiKey: string): Promise<boolean> => {
         }
     });
 
-    console.log('\n\n\n\n', 'Record', record, '\n\n\n\n');
-
     if (!record) {
         return false;
     }
