@@ -112,7 +112,6 @@ export async function GET(request: Request) {
   const vehicleBranch =
     searchParams.get("vehicleBranch")?.trim() ||
     searchParams.get("branch")?.trim();
-  const driverBranch = searchParams.get("driverBranch")?.trim();
   const driverIdRaw = searchParams.get("driverId")?.trim();
   const vehicleIdRaw = searchParams.get("vehicleId")?.trim();
 
@@ -148,21 +147,11 @@ export async function GET(request: Request) {
       vehicleBranch != null && vehicleBranch.length > 0
         ? vehicleBranch
         : undefined,
-    driverBranch:
-      driverBranch != null && driverBranch.length > 0 ? driverBranch : undefined,
     driverId: driverId ?? undefined,
     vehicleId: vehicleId ?? undefined,
     take,
     skip,
   };
-
-  const emptyListResponse = () =>
-    NextResponse.json({
-      fuelStops: [] as ReturnType<typeof serializeFuelStop>[],
-      total: 0,
-      ...meta,
-      hasMore: false,
-    });
 
   try {
     const where: Prisma.FuelStopWhereInput = {
@@ -172,27 +161,8 @@ export async function GET(request: Request) {
       },
     };
 
-    let driverBranchIds: number[] | null = null;
-    if (driverBranch != null && driverBranch.length > 0) {
-      const matching = await prisma.driver.findMany({
-        where: { branch: driverBranch },
-        select: { id: true },
-      });
-      driverBranchIds = matching.map((d) => d.id);
-      if (driverBranchIds.length === 0) {
-        return emptyListResponse();
-      }
-    }
-
-    if (driverId !== undefined && driverBranchIds !== null) {
-      if (!driverBranchIds.includes(driverId)) {
-        return emptyListResponse();
-      }
+    if (driverId !== undefined) {
       where.driverId = driverId;
-    } else if (driverId !== undefined) {
-      where.driverId = driverId;
-    } else if (driverBranchIds !== null) {
-      where.driverId = { in: driverBranchIds };
     }
 
     if (vehicleId !== undefined) {
