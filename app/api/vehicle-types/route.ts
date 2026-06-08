@@ -10,6 +10,9 @@ export async function POST(request: Request) {
   const { id, name } = await request.json();
 
 
+  console.log(id, '\n', name);
+
+
   try {
 
     if (!id || !name) {
